@@ -1,0 +1,12 @@
+import com.revpasswordmanager.util.PasswordGenerator;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class UserServiceTest {
+
+    @Test
+    public void testPasswordLength() {
+        String pwd = PasswordGenerator.generate(10);
+        assertEquals(10, pwd.length());
+    }
+}

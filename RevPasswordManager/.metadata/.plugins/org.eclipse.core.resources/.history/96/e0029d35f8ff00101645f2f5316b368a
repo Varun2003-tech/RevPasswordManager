@@ -1,0 +1,17 @@
+package com.revpasswordmanager.util;
+
+import java.security.SecureRandom;
+
+public class PasswordGenerator {
+
+    public static String generate(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%";
+        SecureRandom random = new SecureRandom();
+        StringBuilder pwd = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            pwd.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return pwd.toString();
+    }
+}

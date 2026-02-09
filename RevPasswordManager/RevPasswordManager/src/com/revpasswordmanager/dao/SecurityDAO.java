@@ -1,0 +1,94 @@
+package com.revpasswordmanager.dao;
+
+import com.revpasswordmanager.util.DBConnection;
+import com.revpasswordmanager.util.EncryptionUtil;
+
+import java.sql.*;
+import java.time.LocalDateTime;
+
+public class SecurityDAO {
+
+    public void addQuestion(int userId, String question, String answer) throws Exception {
+        String sql = "INSERT INTO security_questions(user_id,question,answer_hash) VALUES(?,?,?)";
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setString(2, question);
+            ps.setString(3, EncryptionUtil.hash(answer));
+            ps.executeUpdate();
+        }
+    }
+    public String getQuestion(int userId) throws Exception {
+        String sql = "SELECT question FROM security_questions WHERE user_id = ?";
+
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("question");
+            }
+        }
+        return null;
+    }
+
+
+    public boolean validateAnswer(int userId, String answer) throws Exception {
+        String sql = "SELECT answer_hash FROM security_questions WHERE user_id=?";
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString(1).equals(EncryptionUtil.hash(answer));
+            }
+        }
+        return false;
+    }
+
+    public String generateCode(int userId) throws Exception {
+        String code = String.valueOf(100000 + new java.util.Random().nextInt(900000));
+        String sql = "INSERT INTO verification_codes(user_id,code,expiry_time) VALUES(?,?,?)";
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setString(2, code);
+            ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now().plusMinutes(5)));
+            ps.executeUpdate();
+        }
+        return code;
+    }
+    public boolean validateVerificationCode(int userId, String code) throws Exception {
+
+        String sql =
+                "SELECT code_id FROM verification_codes " +
+                "WHERE user_id = ? AND code = ? AND is_used = false " +
+                "AND expiry_time > CURRENT_TIMESTAMP";
+
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setString(2, code);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                int codeId = rs.getInt("code_id");
+
+                PreparedStatement update = c.prepareStatement(
+                    "UPDATE verification_codes SET is_used = true WHERE code_id = ?"
+                );
+                update.setInt(1, codeId);
+                update.executeUpdate();
+
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+}

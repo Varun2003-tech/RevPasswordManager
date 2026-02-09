@@ -1,0 +1,5 @@
+package com.revpasswordmanager.tester;
+
+public class PasswordGeneratorTest {
+
+}

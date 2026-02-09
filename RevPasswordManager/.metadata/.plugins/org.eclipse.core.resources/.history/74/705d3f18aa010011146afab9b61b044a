@@ -1,0 +1,78 @@
+
+
+
+package com.revpasswordmanager.service;
+import com.revpasswordmanager.util.EncryptionUtil;
+
+import com.revpasswordmanager.dao.SecurityDAO;
+import com.revpasswordmanager.dao.UserDAO;
+import com.revpasswordmanager.validation.PasswordValidator;
+
+public class UserService {
+
+    private UserDAO dao = new UserDAO();
+    private SecurityDAO securityDAO = new SecurityDAO();
+
+    public void registerWithSecurityQuestion(
+            String name,
+            String email,
+            String password,
+            String question,
+            String answer
+    ) throws Exception {
+
+        if (!PasswordValidator.isStrong(password)) {
+            throw new IllegalArgumentException(
+                "Password must be at least 8 characters long and include uppercase, lowercase, digit, and special character."
+            );
+        }
+
+        dao.register(name, email, password);
+
+        int userId = dao.getUserIdByEmail(email);
+
+        securityDAO.addQuestion(userId, question, answer);
+    }
+
+    public int login(String email, String password) throws Exception {
+        return dao.login(email, password);
+    }
+
+    //  KEEP THIS
+    public void resetPassword(int userId, String newPassword) throws Exception {
+        dao.updatePassword(userId, newPassword);
+    }
+
+    //  KEEP THIS
+    public int findUserByEmail(String email) throws Exception {
+        return dao.getUserIdByEmail(email);
+    }
+    
+    public boolean updateProfile(
+            int userId,
+            String name,
+            String email,
+            String newPassword
+    ) throws Exception {
+
+        // Validate password again
+        if (!PasswordValidator.isStrong(newPassword)) {
+            throw new IllegalArgumentException(
+                "Password must be at least 8 characters long and include uppercase, lowercase, digit, and special character."
+            );
+        }
+
+        return dao.updateProfile(userId, name, email, newPassword);
+    }
+    
+   
+
+    public boolean verifyMasterPassword(int userId, String inputPassword) throws Exception {
+        String storedHash = dao.getMasterPasswordHash(userId);
+        return EncryptionUtil.verify(inputPassword, storedHash);
+    
+    }
+
+
+}
+

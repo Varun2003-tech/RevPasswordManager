@@ -1,0 +1,19 @@
+package com.revpasswordmanager.service;
+
+import com.revpasswordmanager.dao.PasswordDAO;
+
+public class PasswordService {
+    private PasswordDAO dao = new PasswordDAO();
+
+    public void add(int userId, String account, String username, String password) throws Exception {
+        dao.add(userId, account, username, password);
+    }
+
+    public void list(int userId) throws Exception {
+        dao.list(userId);
+    }
+    public boolean update(int userId, String accountName, String newPassword) throws Exception {
+        return dao.updatePassword(userId, accountName, newPassword);
+    }
+
+}

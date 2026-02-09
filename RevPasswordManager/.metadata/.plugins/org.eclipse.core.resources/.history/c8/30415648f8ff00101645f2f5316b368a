@@ -1,0 +1,5 @@
+package com.revpasswordmanager.model;
+
+public class SecurityQuestion {
+
+}

@@ -1,0 +1,33 @@
+package com.revpasswordmanager.dao;
+
+import com.revpasswordmanager.util.DBConnection;
+import com.revpasswordmanager.util.EncryptionUtil;
+
+import java.sql.*;
+
+public class PasswordDAO {
+
+    public void add(int userId, String account, String username, String password) throws Exception {
+        String sql = "INSERT INTO password_entries(user_id,account_name,username,encrypted_password) VALUES(?,?,?,?)";
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setString(2, account);
+            ps.setString(3, username);
+            ps.setString(4, EncryptionUtil.encrypt(password));
+            ps.executeUpdate();
+        }
+    }
+
+    public void list(int userId) throws Exception {
+        String sql = "SELECT account_name, username FROM password_entries WHERE user_id=?";
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                System.out.println(rs.getString(1) + " | " + rs.getString(2));
+            }
+        }
+    }
+}

@@ -1,0 +1,300 @@
+package com.revpasswordmanager.ui;
+
+import com.revpasswordmanager.service.*;
+
+import java.util.Scanner;
+
+public class MainMenu {
+
+    public static void main(String[] args) throws Exception {
+
+        Scanner sc = new Scanner(System.in);
+        UserService userService = new UserService();
+        PasswordService passwordService = new PasswordService();
+        SecurityService securityService = new SecurityService();
+
+        int userId = -1;
+
+        while (true) {
+        	try {
+        		System.out.println("\n==============================");
+            	System.out.println("1. Register");
+            	System.out.println("2. Login");
+            	System.out.println("3. Add Password");
+            	System.out.println("4. List Passwords");
+            	System.out.println("5. Add Security Question");
+            	System.out.println("6. Forgot Password");
+            	System.out.println("7. Update Password");
+            	System.out.println("8. Delete Password");
+            	System.out.println("9. Logout");
+            	System.out.println("10. Exit");
+            	System.out.print("Enter your choice: ");
+        		String input = sc.nextLine();
+        		int choice = Integer.parseInt(input);
+
+        		switch (choice) {
+
+        		    case 1:
+        		        System.out.print("Name: ");
+        		        String name = sc.nextLine();
+
+        		        System.out.print("Email: ");
+        		        String email = sc.nextLine();
+
+        		        System.out.print("Password: ");
+        		        String password = sc.nextLine();
+
+//        		        userService.register(name, email, password);
+//        		        System.out.println(" Registered successfully");
+        		        
+        		        try {
+        		            userService.register(name, email, password);
+        		            System.out.println("Registered successfully");
+        		        } catch (IllegalArgumentException e) {
+        		            System.out.println("Registration failed: " + e.getMessage());
+        		        }
+
+        		        break;
+        		    case 2:
+        		        if (userId > 0) {
+        		            System.out.println("You are already logged in. Please logout first.");
+        		            break;
+        		        }
+
+        		        System.out.print("Email: ");
+        		        email = sc.nextLine();
+
+        		        System.out.print("Password: ");
+        		        password = sc.nextLine();
+
+        		        userId = userService.login(email, password);
+
+        		        if (userId > 0) {
+        		            System.out.println("Login successful");
+        		        } else {
+        		            System.out.println("Invalid credentials");
+        		        }
+        		        break;
+
+
+//        		    case 2:
+//        		        System.out.print("Email: ");
+//        		        email = sc.nextLine();
+//
+//        		        System.out.print("Password: ");
+//        		        password = sc.nextLine();
+//
+//        		        userId = userService.login(email, password);
+//
+//        		        if (userId > 0) {
+//        		            System.out.println(" Login successful");
+//        		        } else {
+//        		            System.out.println(" Invalid credentials");
+//        		        }
+//        		        break;
+
+        		    case 3:
+        		        if (userId < 0) {
+        		            System.out.println(" Please login first");
+        		            break;
+        		        }
+
+        		        System.out.print("Account name: ");
+        		        String account = sc.nextLine();
+
+        		        System.out.print("Username: ");
+        		        String username = sc.nextLine();
+
+        		        System.out.print("Password: ");
+        		        password = sc.nextLine();
+
+        		        passwordService.add(userId, account, username, password);
+        		        System.out.println(" Password saved");
+        		        break;
+
+        		    case 4:
+        		        if (userId < 0) {
+        		            System.out.println(" Please login first");
+        		            break;
+        		        }
+
+        		        passwordService.list(userId);
+        		        break;
+
+        		    case 5:
+        		        if (userId < 0) {
+        		            System.out.println(" Please login first");
+        		            break;
+        		        }
+
+        		        System.out.print("Enter security question: ");
+        		        String question = sc.nextLine();
+
+        		        System.out.print("Enter answer: ");
+        		        String answer = sc.nextLine();
+
+        		        securityService.addQuestion(userId, question, answer);
+        		        System.out.println(" Security question added");
+        		        break;
+
+        		    //  FORGOT PASSWORD (MAIN PART YOU ASKED FOR)
+        		    case 6:
+        		        System.out.print("Enter registered email: ");
+        		        email = sc.nextLine();
+
+        		        int uid = userService.findUserByEmail(email);
+        		        if (uid < 0) {
+        		            System.out.println(" Email not found");
+        		            break;
+        		        }
+
+        		        System.out.print("Answer your security question: ");
+        		        answer = sc.nextLine();
+
+        		        if (!securityService.validate(uid, answer)) {
+        		            System.out.println(" Incorrect security answer");
+        		            break;
+        		        }
+
+        		        String code = securityService.getCode(uid);
+        		        System.out.println(" Verification Code (demo): " + code);
+
+        		        System.out.print("Enter verification code: ");
+        		        String enteredCode = sc.nextLine();
+
+        		        if (!securityService.verifyCode(uid, enteredCode)) {
+        		            System.out.println(" Invalid or expired verification code");
+        		            break;
+        		        }
+
+        		        System.out.print("Enter new master password: ");
+        		        String newPassword = sc.nextLine();
+
+        		        userService.resetPassword(uid, newPassword);
+        		        System.out.println(" Password reset successful");
+        		        break;
+        		    case 7:
+        		        if (userId < 0) {
+        		            System.out.println("Please login first");
+        		            break;
+        		        }
+
+        		        System.out.print("Enter account name to update: ");
+        		        String updateAccount = sc.nextLine();
+
+        		        System.out.print("Enter new password: ");
+        		        String newPwd = sc.nextLine();
+
+        		        boolean updated = passwordService.update(userId, updateAccount, newPwd);
+
+        		        if (updated) {
+        		            System.out.println("Password updated successfully");
+        		        } else {
+        		            System.out.println("Account not found");
+        		        }
+        		        break;
+        		    case 8:
+        		        if (userId < 0) {
+        		            System.out.println("Please login first");
+        		            break;
+        		        }
+
+        		        System.out.print("Enter account name to delete: ");
+        		        String deleteAccount = sc.nextLine();
+
+        		        boolean deleted = passwordService.delete(userId, deleteAccount);
+
+        		        if (deleted) {
+        		            System.out.println("Password deleted successfully");
+        		        } else {
+        		            System.out.println("Account not found");
+        		        }
+        		        break;
+
+        		    case 9:
+        		        if (userId < 0) {
+        		            System.out.println("You are not logged in.");
+        		        } else {
+        		            userId = -1;
+        		            System.out.println("Logged out successfully.");
+        		        }
+        		        break;
+
+
+        		    case 10:
+        		        System.out.println(" Exiting application");
+        		        sc.close();
+        		        System.exit(0);
+
+        		    default:
+        		        System.out.println(" Invalid choice");
+        		}
+
+        	}
+        	catch (Exception e) {
+                System.out.println(" Error: " + e.getMessage());
+        	}
+//        	System.out.println("\n==============================");
+//        	System.out.println("1. Register");
+//        	System.out.println("2. Login");
+//        	System.out.println("3. Add Password");
+//        	System.out.println("4. List Passwords");
+//        	System.out.println("5. Add Security Question");
+//        	System.out.println("6. Forgot Password");
+//        	System.out.println("7. Exit");
+//        	System.out.print("Enter your choice: ");
+//        	int ch = sc.nextInt();
+//            sc.nextLine();
+//
+//            if (ch == 1) {
+//                System.out.print("Name: ");
+//                String n = sc.nextLine();
+//                System.out.print("Email: ");
+//                String e = sc.nextLine();
+//                System.out.print("Password: ");
+//                String p = sc.nextLine();
+//                userService.register(n, e, p);
+//                System.out.println("Registered");
+//            }
+//
+//            if (ch == 2) {
+//                System.out.print("Email: ");
+//                String e = sc.nextLine();
+//                System.out.print("Password: ");
+//                String p = sc.nextLine();
+//                userId = userService.login(e, p);
+//                System.out.println(userId > 0 ? "Login success" : "Login failed");
+//            }
+//
+//            if (ch == 3 && userId > 0) {
+//                System.out.print("Account: ");
+//                String a = sc.nextLine();
+//                System.out.print("Username: ");
+//                String u = sc.nextLine();
+//                System.out.print("Password: ");
+//                String p = sc.nextLine();
+//                passwordService.add(userId, a, u, p);
+//            }
+//
+//            if (ch == 4 && userId > 0) {
+//                passwordService.list(userId);
+//            }
+//
+//            if (ch == 5 && userId > 0) {
+//                System.out.print("Question: ");
+//                String q = sc.nextLine();
+//                System.out.print("Answer: ");
+//                String a = sc.nextLine();
+//                securityService.addQuestion(userId, q, a);
+//                System.out.println("Security question saved");
+//            }
+//
+//            if (ch == 6) 
+//            System.out.print("Enter registered email: ");
+//            String email = sc.nextLine();;
+//            
+//            
+//        }
+    }
+    }
+}

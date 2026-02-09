@@ -1,0 +1,24 @@
+package com.revpasswordmanager.dao;
+
+import com.revpasswordmanager.util.DBConnection;
+import com.revpasswordmanager.util.EncryptionUtil;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+public class PasswordDAO {
+
+    public void addPassword(int userId, String account, String username, String password) throws Exception {
+        String sql = "INSERT INTO password_entries(user_id,account_name,username,encrypted_password) VALUES(?,?,?,?)";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setString(2, account);
+            ps.setString(3, username);
+            ps.setString(4, EncryptionUtil.encrypt(password));
+            ps.executeUpdate();
+        }
+    }
+}

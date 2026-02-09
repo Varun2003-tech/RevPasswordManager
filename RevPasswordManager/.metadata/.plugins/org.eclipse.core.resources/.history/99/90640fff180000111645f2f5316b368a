@@ -1,0 +1,12 @@
+//package com.revpasswordmanager.tester;
+//import com.revpasswordmanager.util.PasswordGenerator;
+//import org.junit.Test;
+//import static org.junit.Assert.*;
+//
+//public class PasswordGeneratorTest {
+//
+//    @Test
+//    public void testLength() {
+//        assertEquals(12, PasswordGenerator.generate(12).length());
+//    }
+//}

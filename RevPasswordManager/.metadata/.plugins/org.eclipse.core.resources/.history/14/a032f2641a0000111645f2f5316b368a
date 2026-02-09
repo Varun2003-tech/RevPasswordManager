@@ -1,0 +1,35 @@
+package com.revpasswordmanager.service;
+
+import com.revpasswordmanager.dao.UserDAO;
+import com.revpasswordmanager.validation.PasswordValidator;
+
+
+public class UserService {
+    private UserDAO dao = new UserDAO();
+
+//    public void register(String name, String email, String password) throws Exception {
+//        dao.register(name, email, password);
+//    }
+    public void register(String name, String email, String password) throws Exception {
+
+        if (!PasswordValidator.isStrong(password)) {
+            throw new IllegalArgumentException(
+                "Password must be at least 8 characters long and include uppercase, lowercase, digit, and special character."
+            );
+        }
+
+        dao.register(name, email, password);
+    }
+
+    public int login(String email, String password) throws Exception {
+        return dao.login(email, password);
+    }
+
+    public void resetPassword(int userId, String newPassword) throws Exception {
+        dao.updatePassword(userId, newPassword);
+    }
+    public int findUserByEmail(String email) throws Exception {
+        return dao.getUserIdByEmail(email);
+    }
+
+}

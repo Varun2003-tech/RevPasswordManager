@@ -1,0 +1,5 @@
+package com.revpasswordmanager.validation;
+
+public class EmailValidator {
+
+}

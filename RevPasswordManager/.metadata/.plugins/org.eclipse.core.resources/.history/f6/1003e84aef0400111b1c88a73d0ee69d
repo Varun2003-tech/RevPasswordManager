@@ -1,0 +1,217 @@
+package com.revpasswordmanager.ui;
+
+import com.revpasswordmanager.service.*;
+import com.revpasswordmanager.validation.EmailValidator;
+
+import java.util.Scanner;
+
+public class MainMenu {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+        UserService userService = new UserService();
+        PasswordService passwordService = new PasswordService();
+        SecurityService securityService = new SecurityService();
+
+        int userId = -1;
+
+        while (true) {
+            try {
+
+                /* =========================
+                   BEFORE LOGIN
+                   ========================= */
+                if (userId < 0) {
+
+                    System.out.println("\n1.Register  \n2.Login  \n3.Forgot Password  \n4.Exit");
+                    System.out.print("Choice: ");
+                    int ch = Integer.parseInt(sc.nextLine());
+
+                    switch (ch) {
+
+                        case 1:
+                            System.out.print("Enter Name: ");
+                            String name = sc.nextLine();
+
+                            System.out.print("Enter Email: ");
+                            String email = sc.nextLine();
+
+                            if (!EmailValidator.isValid(email)) {
+                                System.out.println("Invalid email format");
+                                break;
+                            }
+
+                            if (userService.emailExists(email)) {
+                                System.out.println("Email already exists");
+                                break;
+                            }
+
+
+                            System.out.print("Enter Password: ");
+                            String pwd = sc.nextLine();
+
+                            System.out.print("Enter Security Question: ");
+                            String q = sc.nextLine();
+
+                            System.out.print("Enter Security Answer: ");
+                            String a = sc.nextLine();
+
+                            userService.registerWithSecurityQuestion(name, email, pwd, q, a);
+                            System.out.println("Registered successfully");
+                            break;
+
+                        case 2:
+                            System.out.print("Enter Email: ");
+                            email = sc.nextLine();
+
+                            System.out.print("Enter Password: ");
+                            pwd = sc.nextLine();
+
+                            userId = userService.login(email, pwd);
+                            System.out.println(userId > 0 ? "Login successful" : "Invalid credentials");
+                            break;
+
+                        case 3:
+                            System.out.print("Registered email: ");
+                            email = sc.nextLine();
+
+                            int uid = userService.findUserByEmail(email);
+                            if (uid < 0) {
+                                System.out.println("Email not found");
+                                break;
+                            }
+
+                            System.out.println("Security Question: " + securityService.getQuestion(uid));
+                            System.out.print("Answer: ");
+                            a = sc.nextLine();
+
+                            if (!securityService.validate(uid, a)) {
+                                System.out.println("Wrong answer");
+                                break;
+                            }
+
+                            String code = securityService.getCode(uid);
+                            System.out.println("Verification Code: " + code);
+
+                            System.out.print("Enter code: ");
+                            if (!securityService.verifyCode(uid, sc.nextLine())) {
+                                System.out.println("Invalid code");
+                                break;
+                            }
+
+                            System.out.print("New password: ");
+                            userService.resetPassword(uid, sc.nextLine());
+                            System.out.println("Password reset successful");
+                            break;
+
+                        case 4:
+                            System.exit(0);
+
+                        default:
+                            System.out.println("Invalid choice");
+                    }
+                }
+
+                /* =========================
+                   AFTER LOGIN
+                   ========================= */
+                else {
+
+                    System.out.println(
+                        "\n1.Update Profile 2.Add Password 3.List 4.View " +
+                        "5.Update 6.Delete 7.Logout 8.Exit"
+                    );
+                    System.out.print("Choice: ");
+                    int ch = Integer.parseInt(sc.nextLine());
+
+                    switch (ch) {
+
+                        case 1:
+                            System.out.println("1.Name 2.Email 3.Password");
+                            int opt = Integer.parseInt(sc.nextLine());
+
+                            if (opt == 1) {
+                                System.out.print("New name: ");
+                                System.out.println(
+                                    userService.updateName(userId, sc.nextLine())
+                                        ? "Updated"
+                                        : "Failed"
+                                );
+                            }
+                            else if (opt == 2) {
+                                System.out.print("New email: ");
+                                String newEmail = sc.nextLine();
+
+                                if (!EmailValidator.isValid(newEmail)) {
+                                    System.out.println("Invalid email");
+                                    break;
+                                }
+
+                                try {
+                                    userService.updateEmail(userId, newEmail);
+                                    System.out.println("Email updated");
+                                } catch (IllegalArgumentException e) {
+                                    System.out.println(e.getMessage());
+                                }
+                            }
+
+                            else if (opt == 3) {
+                                System.out.print("Current password: ");
+                                if (!userService.verifyMasterPassword(userId, sc.nextLine())) {
+                                    System.out.println("Wrong password");
+                                    break;
+                                }
+                                System.out.print("New password: ");
+                                userService.resetPassword(userId, sc.nextLine());
+                                System.out.println("Password updated");
+                            }
+                            break;
+
+                        case 2:
+                            System.out.print("Account: ");
+                            String acc = sc.nextLine();
+                            System.out.print("Username: ");
+                            String u = sc.nextLine();
+                            System.out.print("Password: ");
+                            passwordService.add(userId, acc, u, sc.nextLine());
+                            System.out.println("Saved");
+                            break;
+
+                        case 3:
+                            System.out.print("Master password: ");
+                            if (userService.verifyMasterPassword(userId, sc.nextLine()))
+                                passwordService.list(userId);
+                            else
+                                System.out.println("Wrong password");
+                            break;
+
+                        case 4:
+                            System.out.print("Account: ");
+                            acc = sc.nextLine();
+                            System.out.print("Master password: ");
+                            if (userService.verifyMasterPassword(userId, sc.nextLine()))
+                                System.out.println(passwordService.viewPassword(userId, acc));
+                            else
+                                System.out.println("Wrong password");
+                            break;
+
+                        case 7:
+                            userId = -1;
+                            System.out.println("Logged out");
+                            break;
+
+                        case 8:
+                            System.exit(0);
+
+                        default:
+                            System.out.println("Invalid choice");
+                    }
+                }
+
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
+    }
+}

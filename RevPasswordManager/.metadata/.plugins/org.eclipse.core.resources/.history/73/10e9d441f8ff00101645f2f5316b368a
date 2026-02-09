@@ -1,0 +1,10 @@
+package com.revpasswordmanager.model;
+
+public class PasswordEntry {
+    private int entryId;
+    private String accountName;
+    private String username;
+    private String password;
+
+    // getters and setters
+}

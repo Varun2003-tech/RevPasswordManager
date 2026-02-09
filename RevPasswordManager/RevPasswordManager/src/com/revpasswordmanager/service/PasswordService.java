@@ -1,0 +1,48 @@
+package com.revpasswordmanager.service;
+
+import com.revpasswordmanager.util.EncryptionUtil;
+
+
+import com.revpasswordmanager.dao.PasswordDAO;
+import com.revpasswordmanager.validation.PasswordValidator;
+
+public class PasswordService {
+    private PasswordDAO dao = new PasswordDAO();
+
+    public void add(int userId, String account, String username, String password) throws Exception {
+
+        if (!PasswordValidator.isStrong(password)) {
+            throw new IllegalArgumentException(
+                "Password must be at least 8 characters long and include uppercase, lowercase, digit, and special character."
+            );
+        }
+
+        dao.add(userId, account, username, password);
+    }
+
+    public void list(int userId) throws Exception {
+        dao.list(userId);
+    }
+    public boolean update(int userId, String accountName, String newPassword) throws Exception {
+        return dao.updatePassword(userId, accountName, newPassword);
+    }
+    public boolean delete(int userId, String accountName) throws Exception {
+        return dao.deletePassword(userId, accountName);
+    }
+
+    public String viewPassword(
+            int userId,
+            String accountName
+    ) throws Exception {
+
+        String encrypted = dao.getEncryptedPassword(userId, accountName);
+
+        if (encrypted == null) {
+            return null;
+        }
+
+        return EncryptionUtil.decrypt(encrypted);
+    }
+
+
+}

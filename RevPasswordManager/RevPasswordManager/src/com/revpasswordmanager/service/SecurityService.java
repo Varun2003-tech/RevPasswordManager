@@ -1,0 +1,27 @@
+package com.revpasswordmanager.service;
+
+import com.revpasswordmanager.dao.SecurityDAO;
+
+public class SecurityService {
+    private SecurityDAO dao = new SecurityDAO();
+    
+    public String getQuestion(int userId) throws Exception {
+        return dao.getQuestion(userId);
+    }
+
+    public void addQuestion(int userId, String q, String a) throws Exception {
+        dao.addQuestion(userId, q, a);
+    }
+
+    public boolean validate(int userId, String answer) throws Exception {
+        return dao.validateAnswer(userId, answer);
+    }
+
+    public String getCode(int userId) throws Exception {
+        return dao.generateCode(userId);
+    }
+    public boolean verifyCode(int userId, String code) throws Exception {
+        return dao.validateVerificationCode(userId, code);
+    }
+
+}
