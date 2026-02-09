@@ -100,7 +100,7 @@ RevPasswordManager/
 
 The following ER diagram represents the database schema of the application:
 
-![ER Diagram]("C:\Users\vvvar\Documents\revature_cog\revpassword\ER_Diagram.png")
+![ER Diagram](ER_Diagram.png)
 
 ---
 
