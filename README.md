@@ -100,7 +100,7 @@ RevPasswordManager/
 
 The following ER diagram represents the database schema of the application:
 
-![ER Diagram](ER_Diagram.png)
+![ER Diagram](ER_DIAGRAM.png)
 
 ---
 
