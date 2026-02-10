@@ -107,7 +107,7 @@ The following ER diagram represents the database schema of the application:
 
 ## 🗺️ ARCHITECTURE Diagram
 
-![Architecture Diagram](ARCHIECTURE.jpeg)
+![Architecture Diagram](ARCHITECTURE.jpeg)
 
 ## ⚙️ Installation & Setup
 
